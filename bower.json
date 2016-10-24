@@ -1,0 +1,21 @@
+{
+  "name": "jqueryui-multidate-datepicker",
+  "homepage": "https://github.com/pjpassa/Multiple-Dates-Picker-for-jQuery-UI",
+  "authors": [
+    "PJ Passalacqua <ppassalacqua@worthwhile.com>"
+  ],
+  "description": "An extension of the jqueryui datepicker to allow for selection of multiple dates",
+  "main": "jquery-ui.multidatespicker",
+  "keywords": [
+    "jqueryui",
+    "datepicker"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
