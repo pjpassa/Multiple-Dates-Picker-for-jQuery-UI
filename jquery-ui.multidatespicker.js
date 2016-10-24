@@ -1,7 +1,7 @@
 /*
  * MultiDatesPicker v1.6.4
  * http://multidatespickr.sourceforge.net/
- * 
+ *
  * Copyright 2014, Luca Lauretta
  * Dual licensed under the MIT or GPL version 2 licenses.
  */
@@ -59,6 +59,16 @@
 		var methods = {
 			init : function( options ) {
 				var $this = $(this);
+
+                if(!options) options = {};
+
+                options.onSelect = function() {
+                    $(this).data('datepicker').inline = true;
+                };
+                options.onClose = function() {
+                    $(this).data('datepicker').inline = false;
+                };
+
 				this.multiDatesPicker.changed = false;
 
 				var mdp_events = {
@@ -515,21 +525,8 @@
 	$.multiDatesPicker.uuid = new Date().getTime();
 	$.multiDatesPicker.version = $.ui.multiDatesPicker.version;
 
-	// allows MDP not to hide everytime a date is picked
-	$.multiDatesPicker._hideDatepicker = $.datepicker._hideDatepicker;
-	$.datepicker._hideDatepicker = function(){
-		var target = this._curInst.input[0];
-		var mdp = target.multiDatesPicker;
-		if(!mdp || (this._curInst.inline === false && !mdp.changed)) {
-			return $.multiDatesPicker._hideDatepicker.apply(this, arguments);
-		} else {
-			mdp.changed = false;
-			$.datepicker._refreshDatepicker(target);
-			return;
-		}
-	};
-
 	// Workaround for #4055
 	// Add another global to avoid noConflict issues with inline event handlers
 	window['DP_jQuery_' + dpuuid] = $;
+
 })( jQuery );
