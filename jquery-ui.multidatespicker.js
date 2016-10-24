@@ -7,14 +7,15 @@
  */
 (function( $ ){
 	$.extend($.ui, { multiDatesPicker: { version: "1.6.4" } });
-	
+
 	$.fn.multiDatesPicker = function(method) {
 		var mdp_arguments = arguments;
 		var ret = this;
 		var today_date = new Date();
 		var day_zero = new Date(0);
 		var mdp_events = {};
-		
+		var firstDateSelected = false;
+
 		function removeDate(date, type) {
 			if(!type) type = 'picked';
 			date = dateConvert.call(this, date);
@@ -29,17 +30,17 @@
 		function addDate(date, type, no_sort) {
 			if(!type) type = 'picked';
 			date = dateConvert.call(this, date);
-			
+
 			// @todo: use jQuery UI datepicker method instead
 			date.setHours(0);
 			date.setMinutes(0);
 			date.setSeconds(0);
 			date.setMilliseconds(0);
-			
+
 			if (methods.gotDate.call(this, date, type) === false) {
 				this.multiDatesPicker.dates[type].push(date);
 				if(!no_sort) this.multiDatesPicker.dates[type].sort(methods.compareDates);
-			} 
+			}
 		}
 		function sortDates(type) {
 			if(!type) type = 'picked';
@@ -54,28 +55,28 @@
 			*/
 			return methods.dateConvert.call(this, date, desired_type, date_format);
 		}
-		
+
 		var methods = {
 			init : function( options ) {
 				var $this = $(this);
 				this.multiDatesPicker.changed = false;
-				
+
 				var mdp_events = {
 					beforeShow: function(input, inst) {
 						this.multiDatesPicker.changed = false;
-						if(this.multiDatesPicker.originalBeforeShow) 
+						if(this.multiDatesPicker.originalBeforeShow)
 							this.multiDatesPicker.originalBeforeShow.call(this, input, inst);
 					},
 					onSelect : function(dateText, inst) {
 						var $this = $(this);
 						this.multiDatesPicker.changed = true;
-						
+
 						if (dateText) {
 							$this.multiDatesPicker('toggleDate', dateText);
 							this.multiDatesPicker.changed = true;
 							// @todo: this will be optimized when I'll move methods to the singleton.
 						}
-						
+
 						if (this.multiDatesPicker.mode == 'normal' && this.multiDatesPicker.dates.picked.length > 0 && this.multiDatesPicker.pickableRange) {
 							if(this.multiDatesPicker.dates.picked.length > 0) {
 								var min_date = this.multiDatesPicker.dates.picked[0],
@@ -110,7 +111,7 @@
 									.datepicker("option", "maxDate", max_date);
 							}
 						}
-						
+
 						if(this.multiDatesPicker.originalOnSelect && dateText)
 							this.multiDatesPicker.originalOnSelect.call(this, dateText, inst);
 
@@ -121,11 +122,11 @@
 							isDisabledCalendar = $this.datepicker('option', 'disabled'),
 							isDisabledDate = $this.multiDatesPicker('gotDate', date, 'disabled') !== false,
 							areAllSelected = this.multiDatesPicker.maxPicks <= this.multiDatesPicker.dates.picked.length;
-						
+
 						var bsdReturn = [true, '', null];
 						if(this.multiDatesPicker.originalBeforeShowDay)
 							bsdReturn = this.multiDatesPicker.originalBeforeShowDay.call(this, date);
-						
+
 						bsdReturn[1] = gotThisDate ? 'ui-state-highlight '+bsdReturn[1] : bsdReturn[1];
 						bsdReturn[0] = bsdReturn[0] && !(isDisabledCalendar || isDisabledDate || (areAllSelected && !bsdReturn[1]));
 						return bsdReturn;
@@ -145,23 +146,23 @@
 					this.multiDatesPicker.originalOnSelect = options.onSelect;
 					this.multiDatesPicker.originalBeforeShowDay = options.beforeShowDay;
 					this.multiDatesPicker.originalOnClose = options.onClose;
-					
+
 					// datepicker init
 					$this.datepicker(options);
-					
+
 					this.multiDatesPicker.minDate = $.datepicker._determineDate(this, options.minDate, null);
 					this.multiDatesPicker.maxDate = $.datepicker._determineDate(this, options.maxDate, null);
 					if(options.addDates) methods.addDates.call(this, options.addDates);
 
 					if(options.addDisabledDates)
 						methods.addDates.call(this, options.addDisabledDates, 'disabled');
-					
+
 					methods.setMode.call(this, options);
 				} else {
 					$this.datepicker();
 				}
 				$this.datepicker('option', mdp_events);
-				
+
 				// adds any dates found in the input or alt field
 				if(inputDates) $this.multiDatesPicker('value', inputDates);
 
@@ -170,7 +171,7 @@
 
 				// fills the input field back with all the dates in the calendar
 				$this.val(inputs_values);
-				
+
 				// Fixes the altField filled with defaultDate by default
 				var altFieldOption = $this.datepicker('option', 'altField');
 				if (altFieldOption) $(altFieldOption).val(inputs_values);
@@ -181,13 +182,13 @@
 			compareDates : function(date1, date2) {
 				date1 = dateConvert.call(this, date1);
 				date2 = dateConvert.call(this, date2);
-				// return > 0 means date1 is later than date2 
-				// return == 0 means date1 is the same day as date2 
-				// return < 0 means date1 is earlier than date2 
+				// return > 0 means date1 is later than date2
+				// return == 0 means date1 is the same day as date2
+				// return < 0 means date1 is earlier than date2
 				var diff = date1.getFullYear() - date2.getFullYear();
 				if(!diff) {
 					diff = date1.getMonth() - date2.getMonth();
-					if(!diff) 
+					if(!diff)
 						diff = date1.getDate() - date2.getDate();
 				}
 				return diff;
@@ -215,10 +216,10 @@
 				}
 
 				if(typeof date == 'undefined') date = new Date(0);
-				
+
 				if(desired_format != 'string' && desired_format != 'object' && desired_format != 'number')
 					$.error('Date format "'+ desired_format +'" not supported!');
-				
+
 				if(!dateFormat) {
 					// thanks to bibendus83 -> http://sourceforge.net/tracker/index.php?func=detail&aid=3213174&group_id=358205&atid=1495382
 					var dp_dateFormat = $this.datepicker('option', 'dateFormat');
@@ -228,7 +229,7 @@
 						dateFormat = $.datepicker._defaults.dateFormat;
 					}
 				}
-				
+
 				// converts to object as a neutral format
 				switch(from_format) {
 					case 'object': break;
@@ -276,13 +277,13 @@
 						for(var i in this.multiDatesPicker.dates[type])
 							o_dates.push(
 								dateConvert.call(
-									this, 
-									this.multiDatesPicker.dates[type][i], 
+									this,
+									this.multiDatesPicker.dates[type][i],
 									format
 								)
 							);
 						return o_dates;
-					
+
 					default: $.error('Format "'+format+'" not supported!');
 				}
 			},
@@ -302,7 +303,7 @@
 						case 'number':
 							addDate.call(this, dates, type);
 							break;
-						default: 
+						default:
 							$.error('Date format "'+ typeof dates +'" not allowed on jQuery.multiDatesPicker');
 					}
 					//$(this).datepicker('refresh');
@@ -340,7 +341,7 @@
 			},
 			toggleDate : function( date, type ) {
 				if(!type) type = 'picked';
-				
+
 				switch(this.multiDatesPicker.mode) {
 					case 'daysRange':
 						this.multiDatesPicker.dates[type] = []; // deletes all picked/disabled dates
@@ -350,43 +351,48 @@
 							end = this.multiDatesPicker.autoselectRange[0];
 							begin = this.multiDatesPicker.autoselectRange[1];
 						}
-						for(var i = begin; i < end; i++) 
+						for(var i = begin; i < end; i++)
 							methods.addDates.call(this, methods.sumDays.call(this,date, i), type);
 						break;
 					case 'freeRange':
                         // select a range of dates by clicking the first and the last date in the range
-
-						if(this.multiDatesPicker.dates.picked.length == 1){
-							var begin = this.multiDatesPicker.dates.picked[0];
-                            date = dateConvert.call(this, date);
+                        date = dateConvert.call(this, date);
+                        if (!this.multiDatesPicker.firstDateSelected) {
+                            this.haveFirstDate = methods.gotDate.call(this, date, type);
+                            if (!this.haveFirstDate) {
+                                methods.addDates.call(this, [date], type);
+                            }
+                            this.startDate = new Date(date);
+                        } else {
+                            var begin = this.startDate;
                             var end = new Date(date);
-                            if(end < begin) { //switch
+
+                            var one_date = end == begin;
+                            if (end < begin) { //switch
                                 var tmp = end;
                                 end = begin;
                                 begin = tmp;
-                            }
-
-                            var dates = [];
-                            var broke = false;
-                            for(var cur = new Date(begin.getTime()); cur<=end; cur = methods.sumDays(cur, 1)){
-                                isDisabledDate = methods.gotDate.call(this, cur, 'disabled') !== false;
-                                if (isDisabledDate){
-                                    broke = true;
-                                    break;
+                                if (!this.haveFirstDate) {
+                                    end = methods.sumDays(end, -1);
                                 }
-                                dates.push(new Date(cur.getTime()));
                             }
-                            if (broke === false){
-                                this.multiDatesPicker.dates[type] = dates;
+                            else {
+                                if (!this.haveFirstDate) {
+                                    begin = methods.sumDays(begin, 1);
+                                }
                             }
-                            else{
-                                this.multiDatesPicker.dates[type] = []; // clear on invalid select
+                            for (var cur = begin; cur <= end; cur = methods.sumDays(cur, 1)) {
+                                isDisabledDate = methods.gotDate.call(this, cur, 'disabled') !== false;
+                                if (isDisabledDate) {
+                                    continue;
+                                }
+                                if(methods.gotDate.call(this, cur) === false) // adds dates
+                                    methods.addDates.call(this, [new Date(cur.getTime())], type);
+                                else // removes dates
+                                    methods.removeDates.call(this, [cur], type);
                             }
                         }
-						else{ // removes dates
-							this.multiDatesPicker.dates[type] = [];
-                            methods.addDates.call(this, date, type);
-                        }
+                        this.multiDatesPicker.firstDateSelected = !this.multiDatesPicker.firstDateSelected;
 						break;
 					default:
 						if(methods.gotDate.call(this, date) === false) // adds dates
@@ -395,11 +401,11 @@
 							methods.removeDates.call(this, date, type);
 						break;
 				}
-			}, 
+			},
 			setMode : function( options ) {
 				var $this = $(this);
 				if(options.mode) this.multiDatesPicker.mode = options.mode;
-				
+
 				switch(this.multiDatesPicker.mode) {
 					case 'normal':
 						for(option in options)
@@ -429,14 +435,14 @@
 						if(mandatory > 0) $.error('Some mandatory options not specified!');
 					break;
 				}
-				
+
 				/*
 				if(options.pickableRange) {
 					$this.datepicker("option", "maxDate", options.pickableRange);
 					$this.datepicker("option", "minDate", this.multiDatesPicker.minDate);
 				}
 				*/
-				
+
 				if(mdp_events.onSelect)
 					mdp_events.onSelect();
 			},
@@ -445,7 +451,7 @@
 				$(this).datepicker('destroy');
 			}
 		};
-		
+
 		this.each(function() {
 			var $this = $(this);
 			if (!this.multiDatesPicker) {
@@ -458,7 +464,7 @@
 					adjustRangeToDisabled: true
 				};
 			}
-			
+
 			if(methods[method]) {
 				var exec_result = methods[method].apply(this, Array.prototype.slice.call(mdp_arguments, 1));
 				switch(method) {
