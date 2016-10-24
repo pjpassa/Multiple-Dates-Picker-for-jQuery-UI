@@ -1,5 +1,5 @@
 /*
- * MultiDatesPicker v1.6.4
+ * MultiDatesPicker v1.7.0
  * http://multidatespickr.sourceforge.net/
  *
  * Copyright 2014, Luca Lauretta
